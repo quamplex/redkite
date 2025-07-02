@@ -44,7 +44,7 @@ RkSpinBox::RkSpinBoxImpl::RkSpinBoxImpl(RkSpinBox *interface,
                                         RkWidget *parent)
         : RkWidgetImpl(static_cast<RkWidget*>(interface), parent)
         , inf_ptr{interface}
-        , currentItemIndex{-1}
+        , currentItemIndex{0}
         , upButton{nullptr}
         , downButton{nullptr}
         , displayLabel{nullptr}
@@ -162,12 +162,13 @@ void RkSpinBox::RkSpinBoxImpl::updateControls()
 
 void RkSpinBox::RkSpinBoxImpl::setCurrentIndex(int index)
 {
-        if (spinBoxItems.empty())
+        if (spinBoxItems.empty()) {
+                currentItemIndex = 0;
                 return;
+        }
 
         currentItemIndex = std::clamp(index, 0, static_cast<int>(spinBoxItems.size() - 1));
-        if (std::holds_alternative<std::string>(spinBoxItems[static_cast<size_t>(currentItemIndex)]))
-                displayLabel->setText(std::get<std::string>(spinBoxItems[static_cast<size_t>(currentItemIndex)]));
+        updateTextLabel();
 }
 
 int RkSpinBox::RkSpinBoxImpl::currentIndex() const
@@ -178,6 +179,8 @@ int RkSpinBox::RkSpinBoxImpl::currentIndex() const
 void RkSpinBox::RkSpinBoxImpl::addItem(const RkVariant& item)
 {
         spinBoxItems.push_back(item);
+        if (displayLabel->text().empty())
+                updateTextLabel();
 }
 
 void RkSpinBox::RkSpinBoxImpl::clear()
@@ -193,6 +196,16 @@ RkVariant RkSpinBox::RkSpinBoxImpl::currentItem() const
         return {};
 }
 
+void RkSpinBox::RkSpinBoxImpl::setCurrentItem(const RkVariant& item)
+{
+        auto it = std::find(spinBoxItems.begin(), spinBoxItems.end(), item);
+        if (it != spinBoxItems.end())
+                currentItemIndex = static_cast<int>(std::distance(spinBoxItems.begin(), it));
+        else
+                currentItemIndex = 0;
+        updateTextLabel();
+}
+
 RkButton* RkSpinBox::RkSpinBoxImpl::upControl() const
 {
         return upButton;
@@ -201,4 +214,15 @@ RkButton* RkSpinBox::RkSpinBoxImpl::upControl() const
 RkButton* RkSpinBox::RkSpinBoxImpl::downControl() const
 {
         return downButton;
+}
+
+void RkSpinBox::RkSpinBoxImpl::updateTextLabel()
+{
+        if (currentItemIndex < 0
+            || static_cast<size_t>(currentItemIndex) >= spinBoxItems.size())
+                return;
+
+        const auto &item = spinBoxItems[static_cast<size_t>(currentItemIndex)];
+        if (std::holds_alternative<std::string>(item))
+                displayLabel->setText(std::get<std::string>(item));
 }

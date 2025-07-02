@@ -49,9 +49,13 @@ class RkSpinBox::RkSpinBoxImpl : public RkWidget::RkWidgetImpl {
     void addItem(const RkVariant& item);
     void clear();
     RkVariant currentItem() const;
+    void setCurrentItem(const RkVariant& item);
     RkButton* upControl() const;
     RkButton* downControl() const;
     void updateControls();
+
+protected:
+        void updateTextLabel();
 
  private:
     RK_DECALRE_INTERFACE_PTR(RkSpinBox);
