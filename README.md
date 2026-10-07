@@ -8,6 +8,8 @@ Version: 2.3.0
 
 License: GNU General Public License v3.0
 
+Website: https://quamplex.com
+
 ## Overview
 
 Redkite is a small [free software](https://gnu.org/philosophy/free-sw.en.html) GUI toolkit.
